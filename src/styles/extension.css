@@ -45,7 +45,7 @@
   color: var(--text);
   font-size: 14px;
   line-height: 1.35;
-  user-select: none;
+  user-select: text;
 }
 
 .aave-calc__trigger,
@@ -56,6 +56,7 @@
   color: var(--text);
   cursor: pointer;
   font: inherit;
+  user-select: none;
 }
 
 .aave-calc__trigger {
