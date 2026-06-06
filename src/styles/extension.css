@@ -309,6 +309,8 @@ input:focus {
 .metric span,
 .metric small {
   color: var(--metric-subtle);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
 }
 
 .metric--ok {

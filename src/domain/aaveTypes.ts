@@ -16,6 +16,7 @@ export type AavePositionSnapshot = {
   walletAddress: string | null;
   market: string;
   updatedAt: number;
+  btcPriceUsdt?: number;
   supplies: SupplyPosition[];
   borrows: BorrowPosition[];
   usdtBrl: number;

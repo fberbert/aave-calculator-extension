@@ -21,6 +21,7 @@ const demoSnapshot: AavePositionSnapshot = {
   walletAddress: null,
   market: 'Aave V3 Arbitrum',
   updatedAt: Date.now(),
+  btcPriceUsdt: 75402.34739696793,
   supplies: [{ symbol: 'WBTC', amount: 0.0089972, priceUsdt: 75402.34739696793, collateralEnabled: true }],
   borrows: [{ symbol: 'USDT', amount: 220.17, priceUsdt: 0.9989099332334106, variableBorrowApy: 3.71 }],
   usdtBrl: 5.42
@@ -170,6 +171,7 @@ export function AaveCalculator() {
           borrowRoomUsdt={borrowRoomUsdt}
           liquidationPriceUsdt={liquidationPriceUsdt}
           usdtBrl={snapshot.usdtBrl}
+          btcPriceUsdt={snapshot.btcPriceUsdt}
         />
         <BorrowSimulator portfolio={portfolio} targetLtvPercent={70} usdtBrl={snapshot.usdtBrl} />
         <PositionTable snapshot={snapshot} />

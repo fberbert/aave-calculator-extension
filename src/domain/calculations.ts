@@ -39,6 +39,14 @@ export function calculateBorrowForTargetLtv(
   return calculateBorrowRoom(portfolio, targetLtvPercent);
 }
 
+export function estimateBtcValue(valueUsdt: number, btcPriceUsdt: number): number | null {
+  if (!Number.isFinite(valueUsdt) || !Number.isFinite(btcPriceUsdt) || btcPriceUsdt <= 0) {
+    return null;
+  }
+
+  return valueUsdt / btcPriceUsdt;
+}
+
 export function calculateLiquidationPrice(
   snapshot: AavePositionSnapshot,
   liquidationLtvPercent: number,

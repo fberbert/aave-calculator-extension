@@ -4,6 +4,7 @@ import {
   calculateBorrowRoom,
   calculateLiquidationPrice,
   calculatePortfolio,
+  estimateBtcValue,
   simulateBorrow
 } from '../domain/calculations';
 import type { AavePositionSnapshot } from '../domain/aaveTypes';
@@ -61,5 +62,11 @@ describe('Aave calculator math', () => {
     expect(calculateBorrowForTargetLtv(portfolio, 50)).toBeCloseTo(119.27, 2);
     expect(calculateBorrowForTargetLtv(portfolio, 70)).toBeCloseTo(254.96, 2);
     expect(calculateBorrowForTargetLtv(portfolio, 30)).toBe(0);
+  });
+
+  it('estimates a USDT value in BTC using the current BTC price', () => {
+    expect(estimateBtcValue(678.41, 75402.34739696793)).toBeCloseTo(0.0089972, 8);
+    expect(estimateBtcValue(219.93, 75402.34739696793)).toBeCloseTo(0.00291675, 8);
+    expect(estimateBtcValue(219.93, 0)).toBeNull();
   });
 });

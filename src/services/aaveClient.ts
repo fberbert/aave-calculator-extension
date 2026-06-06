@@ -162,6 +162,7 @@ export async function fetchAaveArbitrumSnapshot(
     walletAddress,
     market: 'Aave V3 Arbitrum',
     updatedAt: prices.updatedAt,
+    btcPriceUsdt: prices.btcUsdt,
     supplies,
     borrows,
     usdtBrl: prices.usdtBrl
