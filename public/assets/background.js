@@ -1,4 +1,5 @@
 const KUCOIN_BASE_URL = 'https://api.kucoin.com/api/v1/market/orderbook/level1';
+const KUCOIN_FIAT_URL = 'https://api.kucoin.com/api/v1/prices?base=BRL&currencies=USDT';
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message?.type !== 'FETCH_KUCOIN_PRICES') {
@@ -30,15 +31,21 @@ async function fetchKuCoinPrices() {
 }
 
 async function getUsdtBrl() {
-  try {
-    return await getTickerPrice('USDT-BRL');
-  } catch {
-    const inverted = await getTickerPrice('BRL-USDT');
-    return {
-      price: 1 / inverted.price,
-      time: inverted.time
-    };
+  const response = await fetch(KUCOIN_FIAT_URL);
+  if (!response.ok) {
+    throw new Error(`KuCoin fiat USDT/BRL request failed with ${response.status}`);
   }
+
+  const payload = await response.json();
+  const price = Number(payload?.data?.USDT);
+  if (payload?.code !== '200000' || !Number.isFinite(price) || price <= 0) {
+    throw new Error('KuCoin fiat USDT/BRL response did not contain a valid price');
+  }
+
+  return {
+    price,
+    time: Date.now()
+  };
 }
 
 async function getTickerPrice(symbol) {

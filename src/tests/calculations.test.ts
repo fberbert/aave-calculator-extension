@@ -3,8 +3,10 @@ import {
   calculateBorrowForTargetLtv,
   calculateBorrowRoom,
   calculateLiquidationPrice,
+  calculateSimulatedLiquidationPrice,
   calculatePortfolio,
   estimateBtcValue,
+  estimateNetBtcBalance,
   simulateBorrow
 } from '../domain/calculations';
 import type { AavePositionSnapshot } from '../domain/aaveTypes';
@@ -54,6 +56,7 @@ describe('Aave calculator math', () => {
     expect(simulation.simulatedLtvPercent).toBeCloseTo(47.16, 2);
     expect(simulation.remainingBeforeTargetUsdt).toBeCloseTo(154.96, 2);
     expect(simulation.exceedsTarget).toBe(false);
+    expect(calculateSimulatedLiquidationPrice(snapshot, 100, 75)).toBeCloseTo(47411.79, 2);
   });
 
   it('calculates how much USDT can be borrowed to reach a target LTV', () => {
@@ -68,5 +71,10 @@ describe('Aave calculator math', () => {
     expect(estimateBtcValue(678.41, 75402.34739696793)).toBeCloseTo(0.0089972, 8);
     expect(estimateBtcValue(219.93, 75402.34739696793)).toBeCloseTo(0.00291675, 8);
     expect(estimateBtcValue(219.93, 0)).toBeNull();
+  });
+
+  it('estimates the net BTC balance from collateral minus debt', () => {
+    expect(estimateNetBtcBalance(678.41, 219.93, 75402.34739696793)).toBeCloseTo(0.00608045, 8);
+    expect(estimateNetBtcBalance(678.41, 219.93, 0)).toBeNull();
   });
 });

@@ -22,3 +22,10 @@ export function formatCrypto(value: number, symbol: string): string {
     maximumFractionDigits: 8
   }).format(value)} ${symbol}`;
 }
+
+export function formatFixedBtc(value: number): string {
+  return `${new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 8,
+    maximumFractionDigits: 8
+  }).format(value)} BTC`;
+}

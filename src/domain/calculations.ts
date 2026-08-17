@@ -47,23 +47,70 @@ export function estimateBtcValue(valueUsdt: number, btcPriceUsdt: number): numbe
   return valueUsdt / btcPriceUsdt;
 }
 
+export function estimateNetBtcBalance(
+  collateralUsdt: number,
+  debtUsdt: number,
+  btcPriceUsdt: number
+): number | null {
+  const collateralBtc = estimateBtcValue(collateralUsdt, btcPriceUsdt);
+  const debtBtc = estimateBtcValue(debtUsdt, btcPriceUsdt);
+
+  if (collateralBtc === null || debtBtc === null) {
+    return null;
+  }
+
+  return collateralBtc - debtBtc;
+}
+
 export function calculateLiquidationPrice(
   snapshot: AavePositionSnapshot,
   liquidationLtvPercent: number,
   collateralSymbol = 'WBTC'
 ): number | null {
   const portfolio = calculatePortfolio(snapshot);
+  return calculateLiquidationPriceForDebt(
+    snapshot,
+    portfolio.collateralUsdt,
+    portfolio.debtUsdt,
+    liquidationLtvPercent,
+    collateralSymbol
+  );
+}
+
+export function calculateSimulatedLiquidationPrice(
+  snapshot: AavePositionSnapshot,
+  additionalBorrowUsdt: number,
+  liquidationLtvPercent: number,
+  collateralSymbol = 'WBTC'
+): number | null {
+  const portfolio = calculatePortfolio(snapshot);
+  return calculateLiquidationPriceForDebt(
+    snapshot,
+    portfolio.collateralUsdt,
+    portfolio.debtUsdt + Math.max(0, additionalBorrowUsdt),
+    liquidationLtvPercent,
+    collateralSymbol
+  );
+}
+
+function calculateLiquidationPriceForDebt(
+  snapshot: AavePositionSnapshot,
+  collateralUsdt: number,
+  debtUsdt: number,
+  liquidationLtvPercent: number,
+  collateralSymbol: string
+): number | null {
   const trackedCollateral = snapshot.supplies.find(
     (supply) => supply.collateralEnabled && supply.symbol.toUpperCase() === collateralSymbol.toUpperCase()
   );
 
-  if (!trackedCollateral || trackedCollateral.amount <= 0 || portfolio.debtUsdt <= 0) {
+  if (!trackedCollateral || trackedCollateral.amount <= 0 || debtUsdt <= 0) {
     return null;
   }
 
   const trackedCollateralValue = trackedCollateral.amount * trackedCollateral.priceUsdt;
-  const otherCollateralUsdt = portfolio.collateralUsdt - trackedCollateralValue;
-  const requiredCollateralUsdt = portfolio.debtUsdt / (liquidationLtvPercent / 100);
+  const otherCollateralUsdt = collateralUsdt - trackedCollateralValue;
+  const requiredCollateralUsdt = debtUsdt / (liquidationLtvPercent / 100);
   const requiredTrackedCollateralUsdt = requiredCollateralUsdt - otherCollateralUsdt;
 
   return requiredTrackedCollateralUsdt <= 0

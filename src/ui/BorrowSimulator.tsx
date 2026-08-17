@@ -1,9 +1,14 @@
 import { useMemo, useState } from 'react';
-import { calculateBorrowForTargetLtv, simulateBorrow } from '../domain/calculations';
-import type { PortfolioSummary } from '../domain/aaveTypes';
+import {
+  calculateBorrowForTargetLtv,
+  calculateSimulatedLiquidationPrice,
+  simulateBorrow
+} from '../domain/calculations';
+import type { AavePositionSnapshot, PortfolioSummary } from '../domain/aaveTypes';
 import { formatMoney, formatPercent } from '../domain/formatters';
 
 type Props = {
+  snapshot: AavePositionSnapshot;
   portfolio: PortfolioSummary;
   targetLtvPercent: number;
   usdtBrl: number;
@@ -11,7 +16,7 @@ type Props = {
 
 type SimulationMode = 'usdt' | 'ltv';
 
-export function BorrowSimulator({ portfolio, targetLtvPercent, usdtBrl }: Props) {
+export function BorrowSimulator({ snapshot, portfolio, targetLtvPercent, usdtBrl }: Props) {
   const [mode, setMode] = useState<SimulationMode>('usdt');
   const [borrowAmount, setBorrowAmount] = useState('0');
   const [targetLtv, setTargetLtv] = useState(String(targetLtvPercent));
@@ -29,6 +34,10 @@ export function BorrowSimulator({ portfolio, targetLtvPercent, usdtBrl }: Props)
   const simulation = useMemo(
     () => simulateBorrow(portfolio, simulatedBorrowAmount, targetLtvPercent),
     [portfolio, simulatedBorrowAmount, targetLtvPercent]
+  );
+  const simulatedLiquidationPriceUsdt = useMemo(
+    () => calculateSimulatedLiquidationPrice(snapshot, simulatedBorrowAmount, 75),
+    [snapshot, simulatedBorrowAmount]
   );
   const targetIsBelowCurrent = mode === 'ltv' && normalizedTargetLtv <= portfolio.ltvPercent;
 
@@ -96,6 +105,12 @@ export function BorrowSimulator({ portfolio, targetLtvPercent, usdtBrl }: Props)
             : simulation.exceedsTarget
               ? `Passa ${formatMoney(Math.abs(simulation.remainingBeforeTargetUsdt))} da meta`
               : `Sobra ${formatMoney(simulation.remainingBeforeTargetUsdt)} até ${targetLtvPercent}%`}
+        </small>
+        <small>
+          Preço de liquidação:{' '}
+          {simulatedLiquidationPriceUsdt === null
+            ? 'Sem BTC'
+            : formatMoney(simulatedLiquidationPriceUsdt)}
         </small>
       </div>
     </section>

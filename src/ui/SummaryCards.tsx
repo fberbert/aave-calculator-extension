@@ -1,6 +1,6 @@
 import type { PortfolioSummary } from '../domain/aaveTypes';
-import { estimateBtcValue } from '../domain/calculations';
-import { formatCrypto, formatMoney, formatPercent } from '../domain/formatters';
+import { estimateBtcValue, estimateNetBtcBalance } from '../domain/calculations';
+import { formatCrypto, formatFixedBtc, formatMoney, formatPercent } from '../domain/formatters';
 
 type Props = {
   portfolio: PortfolioSummary;
@@ -14,12 +14,13 @@ export function SummaryCards({ portfolio, borrowRoomUsdt, liquidationPriceUsdt, 
   const ltvTone = portfolio.ltvPercent >= 70 ? 'danger' : portfolio.ltvPercent >= 50 ? 'warning' : 'ok';
   const collateralBtc = estimateBtcValue(portfolio.collateralUsdt, btcPriceUsdt ?? 0);
   const debtBtc = estimateBtcValue(portfolio.debtUsdt, btcPriceUsdt ?? 0);
+  const netBtcBalance = estimateNetBtcBalance(portfolio.collateralUsdt, portfolio.debtUsdt, btcPriceUsdt ?? 0);
 
   return (
     <div className="summary-grid">
       <Metric label="Garantia" value={formatMoney(portfolio.collateralUsdt)} tone="collateral" subvalue={formatBrlAndBtc(portfolio.collateralBrl, collateralBtc)} />
       <Metric label="Dívida" value={formatMoney(portfolio.debtUsdt)} tone="debt" subvalue={formatBrlAndBtc(portfolio.debtBrl, debtBtc)} />
-      <Metric label="LTV atual" value={formatPercent(portfolio.ltvPercent)} tone={ltvTone} subvalue="Dívida / garantia" />
+      <Metric label="LTV atual" value={formatPercent(portfolio.ltvPercent)} tone={ltvTone} subvalue={formatNetBtcBalance(netBtcBalance)} />
       <Metric label="Borrow até 70%" value={formatMoney(borrowRoomUsdt)} tone="capacity" subvalue={formatMoney(borrowRoomUsdt * usdtBrl, 'BRL')} />
       <Metric
         label="BTC liquida em 75%"
@@ -38,6 +39,14 @@ function formatBrlAndBtc(valueBrl: number, valueBtc: number | null): string {
   }
 
   return `${formatMoney(valueBrl, 'BRL')} | ${formatCrypto(valueBtc, 'BTC')}`;
+}
+
+function formatNetBtcBalance(valueBtc: number | null): string {
+  if (valueBtc === null) {
+    return 'Saldo: -- BTC';
+  }
+
+  return `Saldo: ${formatFixedBtc(valueBtc)}`;
 }
 
 function Metric({

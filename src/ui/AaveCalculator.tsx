@@ -173,7 +173,7 @@ export function AaveCalculator() {
           usdtBrl={snapshot.usdtBrl}
           btcPriceUsdt={snapshot.btcPriceUsdt}
         />
-        <BorrowSimulator portfolio={portfolio} targetLtvPercent={70} usdtBrl={snapshot.usdtBrl} />
+        <BorrowSimulator snapshot={snapshot} portfolio={portfolio} targetLtvPercent={70} usdtBrl={snapshot.usdtBrl} />
         <PositionTable snapshot={snapshot} />
 
         <footer className="aave-calc__footer">
